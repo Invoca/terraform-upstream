@@ -1408,6 +1408,57 @@ output "a" {
 			},
 		},
 	}
+
+	readDataSourceTest = deferredActionsTest{
+		configs: map[string]string{
+			"main.tf": `
+data "test" "a" {
+	name       = "deferred_read"
+}
+
+resource "test" "b" {
+	name = data.test.a.name
+}
+
+output "a" {
+	value = data.test.a
+}
+
+output "b" {
+	value = test.b
+}
+		`,
+		},
+		stages: []deferredActionsTestStage{
+			{
+				inputs: map[string]cty.Value{},
+				wantPlanned: map[string]cty.Value{
+					"deferred_read": cty.ObjectVal(map[string]cty.Value{
+						"name":           cty.StringVal("deferred_read"),
+						"upstream_names": cty.NullVal(cty.Set(cty.String)),
+						"output":         cty.UnknownVal(cty.String),
+					}),
+				},
+
+				wantActions: map[string]plans.Action{},
+				wantApplied: map[string]cty.Value{
+					// The all resources will be deferred, so shouldn't
+					// have any action at this stage.
+				},
+				wantOutputs: map[string]cty.Value{
+					"a": cty.ObjectVal(map[string]cty.Value{
+						"name": cty.StringVal("deferred_read"),
+					}),
+					"b": cty.NullVal(cty.DynamicPseudoType),
+				},
+				wantDeferred: map[string]providers.DeferredReason{
+					"data.test.a": providers.DeferredReasonProviderConfigUnknown,
+					"test.b":      providers.DeferredReasonDeferredPrereq,
+				},
+				complete: false,
+			},
+		},
+	}
 )
 
 func TestContextApply_deferredActions(t *testing.T) {
@@ -1425,6 +1476,7 @@ func TestContextApply_deferredActions(t *testing.T) {
 		"custom_conditions":                              customConditionsTest,
 		"custom_conditions_with_orphans":                 customConditionsWithOrphansTest,
 		"resource_read":                                  resourceReadTest,
+		"data_read":                                      readDataSourceTest,
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -1610,6 +1662,18 @@ func (provider *deferredActionsProvider) Provider() providers.Interface {
 					},
 				},
 			},
+			DataSources: map[string]providers.Schema{
+				"test": {
+					Block: &configschema.Block{
+						Attributes: map[string]*configschema.Attribute{
+							"name": {
+								Type:     cty.String,
+								Required: true,
+							},
+						},
+					},
+				},
+			},
 		},
 		ReadResourceFn: func(req providers.ReadResourceRequest) providers.ReadResourceResponse {
 			if key := req.PriorState.GetAttr("name"); key.IsKnown() && key.AsString() == "deferred_read" {
@@ -1623,6 +1687,19 @@ func (provider *deferredActionsProvider) Provider() providers.Interface {
 
 			return providers.ReadResourceResponse{
 				NewState: req.PriorState,
+			}
+		},
+		ReadDataSourceFn: func(req providers.ReadDataSourceRequest) providers.ReadDataSourceResponse {
+			if key := req.Config.GetAttr("name"); key.IsKnown() && key.AsString() == "deferred_read" {
+				return providers.ReadDataSourceResponse{
+					State: req.Config,
+					Deferred: &providers.Deferred{
+						Reason: providers.DeferredReasonProviderConfigUnknown,
+					},
+				}
+			}
+			return providers.ReadDataSourceResponse{
+				State: req.Config,
 			}
 		},
 		PlanResourceChangeFn: func(req providers.PlanResourceChangeRequest) providers.PlanResourceChangeResponse {
