@@ -25,7 +25,7 @@ func TestResourceProvider_linuxInstallChefClient(t *testing.T) {
 			},
 
 			Commands: map[string]bool{
-				"sudo curl -LO https://omnitruck.chef.io/install.sh": true,
+				"sudo curl -LO https://omnitruck.cinc.sh/install.sh": true,
 				"sudo bash ./install.sh -v \"\" -c stable":           true,
 				"sudo rm -f install.sh":                              true,
 			},
@@ -43,7 +43,7 @@ func TestResourceProvider_linuxInstallChefClient(t *testing.T) {
 			},
 
 			Commands: map[string]bool{
-				"curl -LO https://omnitruck.chef.io/install.sh": true,
+				"curl -LO https://omnitruck.cinc.sh/install.sh": true,
 				"bash ./install.sh -v \"\" -c stable":           true,
 				"rm -f install.sh":                              true,
 			},
@@ -61,7 +61,7 @@ func TestResourceProvider_linuxInstallChefClient(t *testing.T) {
 			},
 
 			Commands: map[string]bool{
-				"http_proxy='http://proxy.local' curl -LO https://omnitruck.chef.io/install.sh": true,
+				"http_proxy='http://proxy.local' curl -LO https://omnitruck.cinc.sh/install.sh": true,
 				"http_proxy='http://proxy.local' bash ./install.sh -v \"\" -c stable":           true,
 				"http_proxy='http://proxy.local' rm -f install.sh":                              true,
 			},
@@ -79,7 +79,7 @@ func TestResourceProvider_linuxInstallChefClient(t *testing.T) {
 			},
 
 			Commands: map[string]bool{
-				"https_proxy='https://proxy.local' curl -LO https://omnitruck.chef.io/install.sh": true,
+				"https_proxy='https://proxy.local' curl -LO https://omnitruck.cinc.sh/install.sh": true,
 				"https_proxy='https://proxy.local' bash ./install.sh -v \"\" -c stable":           true,
 				"https_proxy='https://proxy.local' rm -f install.sh":                              true,
 			},
@@ -99,7 +99,7 @@ func TestResourceProvider_linuxInstallChefClient(t *testing.T) {
 
 			Commands: map[string]bool{
 				"http_proxy='http://proxy.local' no_proxy='http://local.local,http://local.org' " +
-					"curl -LO https://omnitruck.chef.io/install.sh": true,
+					"curl -LO https://omnitruck.cinc.sh/install.sh": true,
 				"http_proxy='http://proxy.local' no_proxy='http://local.local,http://local.org' " +
 					"bash ./install.sh -v \"\" -c stable": true,
 				"http_proxy='http://proxy.local' no_proxy='http://local.local,http://local.org' " +
@@ -119,7 +119,7 @@ func TestResourceProvider_linuxInstallChefClient(t *testing.T) {
 			},
 
 			Commands: map[string]bool{
-				"curl -LO https://omnitruck.chef.io/install.sh": true,
+				"curl -LO https://omnitruck.cinc.sh/install.sh": true,
 				"bash ./install.sh -v \"11.18.6\" -c stable":    true,
 				"rm -f install.sh": true,
 			},
@@ -138,7 +138,7 @@ func TestResourceProvider_linuxInstallChefClient(t *testing.T) {
 			},
 
 			Commands: map[string]bool{
-				"curl -LO https://omnitruck.chef.io/install.sh": true,
+				"curl -LO https://omnitruck.cinc.sh/install.sh": true,
 				"bash ./install.sh -v \"11.18.6\" -c current":   true,
 				"rm -f install.sh": true,
 			},
